@@ -1,5 +1,5 @@
 // O Viajante: cache para jogar offline depois da primeira abertura.
-const VERSION = 'viajante-v1';
+const VERSION = 'viajante-v2';
 const LOCAL = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './icon-maskable-512.png'];
 const REMOTE = [
   'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js',

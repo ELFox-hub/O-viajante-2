@@ -343,7 +343,7 @@ body.touch #abilities{display:none}
 <div id="ending" hidden><p id="endLine">Se você quer esse final, faça a diferença.</p><h1 id="endFim">FIM</h1><div class="actions" id="endActions" hidden><button type="button" class="primary" id="bEndCont">Continuar explorando</button><button type="button" id="bEndMenu">Menu principal</button></div></div>
 <div class="overlay" id="popup" hidden><div class="sheet" id="popupBody"></div></div>
 <div class="overlay" id="codex" hidden><div class="sheet" id="codexBody"></div></div>
-<div class="overlay" id="mapOv" hidden><div class="sheet"><div class="eyebrow">Mapa-múndi</div><h2>O mundo dividido</h2><canvas id="mapCanvas" width="900" height="800"></canvas><p class="note">Pontos azuis: cristais ainda não coletados (revelados pelo Cinturão da Verdade). Pontos coloridos: marcos de missão. ✦ santuário ativado · ✕ chefe derrotado.</p><div class="actions"><button type="button" data-close>Fechar (M)</button></div></div></div>
+<div class="overlay" id="mapOv" hidden><div class="sheet"><div class="eyebrow">Mapa-múndi</div><h2>O mundo dividido</h2><canvas id="mapCanvas" width="900" height="800"></canvas><p class="note">Pontos azuis: cristais ainda não coletados (revelados pelo Cinturão da Verdade). ♥ laranja: pessoas que precisam de um ato de bondade. ✦ santuário ativado · ✕ chefe derrotado.</p><div class="actions"><button type="button" data-close>Fechar (M)</button></div></div></div>
 <div id="timerHud" hidden></div><div id="countdown" aria-live="assertive"></div>
 <div class="overlay" id="timerEnd" hidden><div class="sheet" id="timerEndBody"></div></div>
 <div class="overlay" id="pause" hidden><div class="sheet"><div class="eyebrow">Pausa</div><h2>Jornada em espera</h2><p class="note" id="pauseSave"></p><div class="actions"><button class="primary" type="button" data-close>Voltar ao jogo</button><button type="button" id="bPHow">Como jogar</button><button type="button" id="bPOpts">Opções</button><button type="button" id="bTitle">Menu principal</button></div></div></div>
@@ -406,18 +406,18 @@ const CRYSTALS=[
 const ARMOR_REQ={};ARMOR.forEach(a=>ARMOR_REQ[a.id]=CRYSTALS.filter(c=>c.piece===a.id).map(c=>c.id));
 
 const REGIONS=[
- {id:'ira',anti:'Ira',name:'Vale da Fúria',pos:[-3000,-3900],r:2360,ground:0x5a1c10,accent:0xff5a1f,fog:0x3a0d06,fogD:.014,sky:0x541608,boss:'Devorador da Ira',key:'Amor',hazard:'lava',enemy:'melee',fx:null,pat:['slam','charge','volley'],shape:0},
- {id:'ganancia',anti:'Ganância',name:'Deserto Dourado',pos:[3000,-3900],r:2360,ground:0x8d6c36,accent:0xffcc4d,fog:0x8a6a38,fogD:.008,sky:0xc79a52,boss:'Rei da Ganância',key:'Bondade',enemy:'ranged',pat:['volley','summon','slam'],shape:1},
- {id:'mentira',anti:'Mentira',name:'Pântano das Máscaras',pos:[-6000,-9000],r:2360,ground:0x1c3324,accent:0x7ad6a8,fog:0x18281e,fogD:.022,sky:0x1e3328,boss:'Serpente da Mentira',key:'Fidelidade',enemy:'melee',fx:'blind',pat:['decoy','volley','charge'],shape:2},
- {id:'desanimo',anti:'Desânimo',name:'Vale das Névoas',pos:[0,-9000],r:2360,ground:0x4a4f57,accent:0x9fb5c9,fog:0x6d7680,fogD:.014,sky:0x7a828c,boss:'Colosso do Desespero',key:'Alegria',enemy:'melee',fx:'slow',pat:['slam','slam','summon'],shape:3},
- {id:'discordia',anti:'Discórdia',name:'Ruínas Fragmentadas',pos:[6000,-9000],r:2360,ground:0x2e1f40,accent:0xb36bff,fog:0x241736,fogD:.012,sky:0x3a2456,boss:'Tecelã da Discórdia',key:'Paz',enemy:'ranged',pat:['volley','summon','charge'],shape:2},
- {id:'impaciencia',anti:'Impaciência',name:'Fábrica do Tempo',pos:[3000,-14100],r:2360,ground:0x4a3020,accent:0xe08a3c,fog:0x3a2618,fogD:.012,sky:0x5a3820,boss:'Titã da Impaciência',key:'Paciência',enemy:'melee',pat:['charge','charge','slam'],shape:1},
- {id:'orgulho',anti:'Orgulho',name:'Cidadela Espelhada',pos:[-3000,-14100],r:2360,ground:0x8794a8,accent:0xdfe9ff,fog:0x8a9ab0,fogD:.009,sky:0x9fb2cc,boss:'Príncipe do Orgulho',key:'Mansidão',enemy:'ranged',pat:['volley','charge','slam'],shape:0},
- {id:'corrupcao',anti:'Corrupção',name:'Terras Contaminadas',pos:[-9000,-14100],r:2360,ground:0x1a2414,accent:0x8cff3a,fog:0x16220f,fogD:.018,sky:0x1c2a12,boss:'Devorador da Corrupção',key:'Domínio próprio',hazard:'toxic',enemy:'melee',fx:'poison',pat:['volley','slam','summon'],shape:3},
- {id:'vazio',anti:'Vazio',name:'Abismo Silencioso',pos:[-6000,-19200],r:2360,ground:0x1a2244,accent:0x4a6cff,fog:0x03040c,fogD:.034,sky:0x02030a,boss:'Eco do Abismo',key:'Perseverança',enemy:'melee',pat:['volley','charge','summon'],shape:2,mission:{text:'Acenda as 3 lanternas do abismo',obj:'lanterna',verb:'Acender lanterna'}},
- {id:'indiferenca',anti:'Indiferença',name:'Cidade Adormecida',pos:[0,-19200],r:2360,ground:0x6f6a60,accent:0xd8cfb8,fog:0x7a766c,fogD:.016,sky:0x8a857a,boss:'Guardião Adormecido',key:'Sabedoria',enemy:'melee',pat:['slam','summon','volley'],shape:1,mission:{text:'Toque os 3 sinos esquecidos da cidade',obj:'sino',verb:'Tocar o sino'}},
- {id:'inveja',anti:'Inveja',name:'Ilhas Tempestuosas',pos:[9000,-14100],r:2360,ground:0x16402e,accent:0x29e07a,fog:0x14303a,fogD:.016,sky:0x1a3a48,boss:'Gêmeo da Inveja',key:'Benignidade',enemy:'ranged',pat:['charge','volley','decoy'],shape:0,mission:{text:'Devolva a luz própria às 3 torres',obj:'torre',verb:'Restaurar a torre'}},
- {id:'medo',anti:'Medo',name:'Floresta Sombria',pos:[6000,-19200],r:2360,ground:0x130e1d,accent:0x8a5cff,fog:0x07050d,fogD:.04,sky:0x07050d,boss:'Sombra do Pavor',key:'Coragem',enemy:'melee',fx:'blind',pat:['charge','summon','slam'],shape:3,mission:{text:'Acenda as 3 tochas da floresta',obj:'tocha',verb:'Acender tocha'}},
+ {id:'ira',anti:'Ira',name:'Vale da Fúria',pos:[-4500,-4300],r:2360,ground:0x5a1c10,accent:0xff5a1f,fog:0x3a0d06,fogD:.014,sky:0x541608,boss:'Devorador da Ira',key:'Amor',hazard:'lava',enemy:'melee',fx:null,pat:['slam','charge','volley'],shape:0},
+ {id:'ganancia',anti:'Ganância',name:'Deserto Dourado',pos:[4500,-3000],r:2360,ground:0x8d6c36,accent:0xffcc4d,fog:0x8a6a38,fogD:.008,sky:0xc79a52,boss:'Rei da Ganância',key:'Bondade',enemy:'ranged',pat:['volley','summon','slam'],shape:1},
+ {id:'mentira',anti:'Mentira',name:'Pântano das Máscaras',pos:[-9000,-9500],r:2360,ground:0x1c3324,accent:0x7ad6a8,fog:0x18281e,fogD:.022,sky:0x1e3328,boss:'Serpente da Mentira',key:'Fidelidade',enemy:'melee',fx:'blind',pat:['decoy','volley','charge'],shape:2},
+ {id:'desanimo',anti:'Desânimo',name:'Vale das Névoas',pos:[-2500,-8500],r:2360,ground:0x4a4f57,accent:0x9fb5c9,fog:0x6d7680,fogD:.014,sky:0x7a828c,boss:'Colosso do Desespero',key:'Alegria',enemy:'melee',fx:'slow',pat:['slam','slam','summon'],shape:3},
+ {id:'discordia',anti:'Discórdia',name:'Ruínas Fragmentadas',pos:[6500,-8500],r:2360,ground:0x2e1f40,accent:0xb36bff,fog:0x241736,fogD:.012,sky:0x3a2456,boss:'Tecelã da Discórdia',key:'Paz',enemy:'ranged',pat:['volley','summon','charge'],shape:2},
+ {id:'impaciencia',anti:'Impaciência',name:'Fábrica do Tempo',pos:[4500,-14000],r:2360,ground:0x4a3020,accent:0xe08a3c,fog:0x3a2618,fogD:.012,sky:0x5a3820,boss:'Titã da Impaciência',key:'Paciência',enemy:'melee',pat:['charge','charge','slam'],shape:1},
+ {id:'orgulho',anti:'Orgulho',name:'Cidadela Espelhada',pos:[-3500,-14000],r:2360,ground:0x8794a8,accent:0xdfe9ff,fog:0x8a9ab0,fogD:.009,sky:0x9fb2cc,boss:'Príncipe do Orgulho',key:'Mansidão',enemy:'ranged',pat:['volley','charge','slam'],shape:0},
+ {id:'corrupcao',anti:'Corrupção',name:'Terras Contaminadas',pos:[-9000,-17500],r:2360,ground:0x1a2414,accent:0x8cff3a,fog:0x16220f,fogD:.018,sky:0x1c2a12,boss:'Devorador da Corrupção',key:'Domínio próprio',hazard:'toxic',enemy:'melee',fx:'poison',pat:['volley','slam','summon'],shape:3},
+ {id:'vazio',anti:'Vazio',name:'Abismo Silencioso',pos:[-4000,-20000],r:2360,ground:0x1a2244,accent:0x4a6cff,fog:0x03040c,fogD:.034,sky:0x02030a,boss:'Eco do Abismo',key:'Perseverança',enemy:'melee',pat:['volley','charge','summon'],shape:2,mission:{text:'Acenda as 3 lanternas do abismo',obj:'lanterna',verb:'Acender lanterna'}},
+ {id:'indiferenca',anti:'Indiferença',name:'Cidade Adormecida',pos:[2500,-19000],r:2360,ground:0x6f6a60,accent:0xd8cfb8,fog:0x7a766c,fogD:.016,sky:0x8a857a,boss:'Guardião Adormecido',key:'Sabedoria',enemy:'melee',pat:['slam','summon','volley'],shape:1,mission:{text:'Toque os 3 sinos esquecidos da cidade',obj:'sino',verb:'Tocar o sino'}},
+ {id:'inveja',anti:'Inveja',name:'Ilhas Tempestuosas',pos:[9000,-15000],r:2360,ground:0x16402e,accent:0x29e07a,fog:0x14303a,fogD:.016,sky:0x1a3a48,boss:'Gêmeo da Inveja',key:'Benignidade',enemy:'ranged',pat:['charge','volley','decoy'],shape:0,mission:{text:'Devolva a luz própria às 3 torres',obj:'torre',verb:'Restaurar a torre'}},
+ {id:'medo',anti:'Medo',name:'Floresta Sombria',pos:[9000,-20200],r:2360,ground:0x130e1d,accent:0x8a5cff,fog:0x07050d,fogD:.04,sky:0x07050d,boss:'Sombra do Pavor',key:'Coragem',enemy:'melee',fx:'blind',pat:['charge','summon','slam'],shape:3,mission:{text:'Acenda as 3 tochas da floresta',obj:'tocha',verb:'Acender tocha'}},
 ];
 const RBY={};REGIONS.forEach(r=>RBY[r.id]=r);
 
@@ -618,7 +618,7 @@ function ridged(x,y,o){let s=0,a=1,f=1,n=0;for(let i=0;i<o;i++){s+=a*(1-Math.abs
 function smooth(e0,e1,x){const t=clamp((x-e0)/(e1-e0),0,1);return t*t*(3-2*t);}
 
 // estradas curvas entre regiões
-const PATHS=[['bluecore','portal'],['ira','ganancia'],['portal','ira'],['portal','ganancia'],['portal','desanimo'],['ira','mentira'],['ira','desanimo'],['ganancia','desanimo'],['ganancia','discordia'],['mentira','desanimo'],['desanimo','discordia'],['mentira','corrupcao'],['mentira','orgulho'],['desanimo','orgulho'],['desanimo','impaciencia'],['discordia','impaciencia'],['discordia','inveja'],['corrupcao','orgulho'],['orgulho','impaciencia'],['impaciencia','inveja'],['corrupcao','vazio'],['orgulho','vazio'],['orgulho','indiferenca'],['impaciencia','indiferenca'],['impaciencia','medo'],['inveja','medo'],['vazio','indiferenca'],['indiferenca','medo'],['vazio','gate'],['indiferenca','gate'],['medo','gate']];
+const PATHS=[['bluecore','portal'],['portal','ira'],['portal','ganancia'],['portal','desanimo'],['ira','ganancia'],['ira','mentira'],['ira','desanimo'],['ganancia','desanimo'],['ganancia','discordia'],['mentira','desanimo'],['mentira','corrupcao'],['mentira','orgulho'],['desanimo','orgulho'],['desanimo','impaciencia'],['desanimo','discordia'],['discordia','impaciencia'],['discordia','inveja'],['orgulho','impaciencia'],['orgulho','corrupcao'],['orgulho','vazio'],['orgulho','indiferenca'],['impaciencia','inveja'],['impaciencia','indiferenca'],['inveja','medo'],['inveja','indiferenca'],['corrupcao','vazio'],['vazio','indiferenca'],['indiferenca','medo'],['vazio','gate'],['indiferenca','gate'],['medo','gate']];
 function nodePos(id){if(id==='bluecore')return[0,230];if(id==='portal')return[0,W.portalZ-3];if(id==='gate')return[0,W.gateZ+20];return RBY[id].pos;}
 const ROADS=PATHS.map(([a,b],i)=>{
  const A=nodePos(a),B=nodePos(b);const dx=B[0]-A[0],dz=B[1]-A[1];const L=Math.hypot(dx,dz);const nx=-dz/L,nz=dx/L;
@@ -768,18 +768,18 @@ const BIOME={
  blue:{crystaltree:5,bluepine:7,bluetree:8,bluebush:10,grass:26,flower:14,rock:4,ruinpillar:1.2},
  restored:{tree:11,pine:4,bush:9,grass:38,flower:26,rock:2},
  wild:{tree:10,pine:5,rock:4,bush:7,grass:34,flower:9},
- ira:{spike:8,blackrock:7,deadtree:3,ember:14},
- ganancia:{cactus:6,sandrock:4,goldpile:2,obelisk:.5,pyramid:.22},
- mentira:{swamptree:11,reed:28,mirror:1,bush:4},
- desanimo:{greypine:12,boulder:5,rock:5,grass:8},
+ ira:{spike:8,blackrock:7,boulder:2,deadtree:3,ember:14},
+ ganancia:{cactus:6,sandrock:4,goldpile:2.6,obelisk:.8,pyramid:.3},
+ mentira:{swamptree:11,reed:28,mirror:1.6,bush:4},
+ desanimo:{greypine:12,boulder:5,rock:5,ruinpillar:.6,grass:8},
  discordia:{pillar:5,shard:7,ruinwall:1.4,rock:3},
  impaciencia:{gear:1.4,chimney:1.1,pipe:1.1,rock:4,deadtree:2},
  orgulho:{tower:.7,statue:2.5,whitepine:6,rock:2,grass:6},
  corrupcao:{deadtree:10,toxshroom:7,rock:3},
- vazio:{obsidian:7,floatrock:1.6,rock:3},
- indiferenca:{house:2.6,lamp:3,bush:5,tree:2,grass:8},
- inveja:{palm:8,crystaltower:.8,rock:4,grass:12},
- medo:{giant:8,darkpine:6,wisp:9,darkbush:6},
+ vazio:{obsidian:7,floatrock:2.4,rock:3},
+ indiferenca:{house:2.6,lamp:3,ruinpillar:.6,bush:5,tree:2,grass:8},
+ inveja:{palm:8,crystaltower:1.2,rock:4,grass:12},
+ medo:{giant:8,darkpine:6,wisp:9,darkbush:6,ruinwall:.5},
 };
 
 /* ---------- blocos de terreno ---------- */
@@ -1244,7 +1244,7 @@ function buildCity(){
  for(let bx=-hf+58;bx<=hf-58;bx+=62)for(let bz=-hf+58;bz<=hf-58;bz+=62){
   const x=bx+(R()-.5)*10,z=bz+(R()-.5)*10;
   if(Math.abs(x)<62)continue;if(Math.hypot(x,z)<170)continue;if(Math.hypot(x,z+hf-110)<120)continue;
-  if(GATES.some(o=>Math.abs(x-o)<34||Math.abs(z-o)<34))continue;if(distSegLocal(x,z)<40)continue;
+  if(GATES.some(o=>Math.abs(x-o)<34||Math.abs(z-o)<34))continue;if(distSegLocal(x,z)<40)continue;if(roadDist(CITY.x+x,CITY.z+z)<34)continue;
   const w=20+R()*22,d=20+R()*22;const cen=1-Math.min(1,Math.hypot(x,z)/hf);const h=24+R()*55+cen*60;
   list.push([x,z,w,d,h,R()]);}
  const bodies=new THREE.InstancedMesh(G.box,bldM,list.length);
