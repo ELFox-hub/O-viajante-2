@@ -96,6 +96,7 @@ button.danger{border-color:var(--danger);color:#ffd2cc}
 #timerHud{position:fixed;top:calc(12px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);display:flex;gap:14px;align-items:baseline;padding:8px 16px;border-radius:12px;background:rgba(10,18,30,.78);border:1px solid rgba(255,216,106,.45);color:#fff;font-size:13px;z-index:6;pointer-events:none;white-space:nowrap}#timerHud b{font-size:22px;color:#ffd86a;font-variant-numeric:tabular-nums}#timerHud span{color:#d7dee6;font-variant-numeric:tabular-nums}
 #countdown{position:fixed;inset:0;display:grid;place-items:center;font-family:Georgia,serif;font-size:min(30vw,180px);color:#ffd86a;text-shadow:0 0 40px rgba(255,200,90,.8);pointer-events:none;opacity:0;z-index:7}#countdown.show{animation:cdpop .9s ease-out forwards}@keyframes cdpop{0%{opacity:0;transform:scale(1.6)}20%{opacity:1;transform:scale(1)}80%{opacity:1}100%{opacity:0;transform:scale(.9)}}
 .bigtime{font-size:46px;font-family:Georgia,serif;color:#ffd86a;margin:6px 0;font-variant-numeric:tabular-nums}
+body.padnav button:focus,body.padnav input:focus,body.padnav select:focus,body.padnav .vfrag:focus{outline:3px solid #ffd86a;outline-offset:3px;box-shadow:0 0 18px rgba(255,216,106,.55)}
 .vlist{display:grid;gap:8px;margin:12px 0}.vfrag{text-align:left;font:inherit;font-size:14px;line-height:1.4;padding:10px 12px;border-radius:10px;border:1px solid rgba(233,200,119,.35);background:rgba(233,200,119,.08);color:inherit;cursor:pointer}.vfrag:hover{background:rgba(233,200,119,.18)}.vfrag.hint{outline:2px solid var(--gold);box-shadow:0 0 18px rgba(233,200,119,.5)}.vout{min-height:3em}
 .tag{display:inline-block;font-size:10px;letter-spacing:.12em;text-transform:uppercase;border:1px solid var(--line);border-radius:4px;padding:1px 6px;color:var(--dim);margin-left:6px;vertical-align:middle}
 .note{font-size:12px;color:var(--dim)}
@@ -306,6 +307,19 @@ body.touch #abilities{display:none}
       <tr><td>Q + F</td><td>Explosão de Luz: com o Escudo da Fé ativo, a Espada do Espírito vira uma grande explosão em volta de você</td></tr>
       <tr><td>R</td><td>Oração: fique parado para recuperar vida</td></tr>
       <tr><td>C · M · Esc</td><td>Códice · Mapa · Pausa</td></tr>
+    </table></div>
+  <h3>Controle (Xbox, PlayStation ou Android)</h3>
+  <div class="tbl"><table>
+      <tr><td>Analógico esquerdo</td><td>Andar (segure LT / L2 ou aperte o analógico para correr)</td></tr>
+      <tr><td>Analógico direito</td><td>Olhar ao redor</td></tr>
+      <tr><td>A / ✕</td><td>Pular</td></tr>
+      <tr><td>B / ○</td><td>Interagir (cristais, santuários, pessoas)</td></tr>
+      <tr><td>X / ▢ ou RT / R2</td><td>Atacar</td></tr>
+      <tr><td>Y / △</td><td>Espada do Espírito</td></tr>
+      <tr><td>LB / L1</td><td>Escudo da Fé (com o escudo ativo, Y faz a Explosão de Luz)</td></tr>
+      <tr><td>RB / R1</td><td>Oração</td></tr>
+      <tr><td>Select · Seta para cima · Start</td><td>Mapa · Códice · Pausa</td></tr>
+      <tr><td>Nos menus</td><td>Setas ou analógico para escolher, A / ✕ para confirmar, B / ○ para voltar</td></tr>
     </table></div>
   <p class="note">No celular, use o controle circular para andar, arraste o dedo na tela para olhar e toque nos botões para agir.</p>
   <h3>Dicas</h3>
@@ -1918,10 +1932,11 @@ function hpTo(p,amt){return p;}
 function reachY(t,lim){return Math.abs(player.pos.y-groundAt(t.x,t.z))<lim+(t.kind==='boss'?5:0);}
 function damagePlayer(dmg,src,proj){
  if(player.dead||player.dash)return;
- if(!proj&&player.pos.y-groundAt(player.pos.x,player.pos.z)>3.2)return; // no alto do pulo, golpes do chão não alcançamif(inBlue()&&!(src&&src.blue))return;
+ if(!proj&&player.pos.y-groundAt(player.pos.x,player.pos.z)>3.2)return; // no alto do pulo, golpes do chão não alcançam
+ if(inBlue()&&!(src&&src.blue))return;
  if(player.shieldT>0){effects.push(fxRing(player.pos.x,player.pos.z,0x9fe9ff,2,.3));return;}
  if(has('couraca'))dmg*=.7;
- player.hp-=dmg;player.hurtT=.25;sfx.hurt();$('#flash').style.opacity=.9;setTimeout(()=>$('#flash').style.opacity=0,120);
+ player.hp-=dmg;player.hurtT=.25;sfx.hurt();if(GP.idx!=null)padRumble(180,Math.min(1,.25+dmg/40));$('#flash').style.opacity=.9;setTimeout(()=>$('#flash').style.opacity=0,120);
  if(player.prayT>0){player.prayT=0;toast('A oração foi interrompida.');}
  if(src&&src.fx)applyFx(src.fx);
  if(player.hp<=0)die();
@@ -2523,13 +2538,14 @@ function update(dt){
  let mx=0,mz=0;
  if(keys.has('w')||keys.has('arrowup'))mz+=1;if(keys.has('s')||keys.has('arrowdown'))mz-=1;if(keys.has('a')||keys.has('arrowleft'))mx+=1;if(keys.has('d')||keys.has('arrowright'))mx-=1;
  if(joy.id!==null){mx-=joy.x;mz-=joy.y;}
+ if(GP.mx||GP.mz){mx-=GP.mx;mz-=GP.mz;}
  const moving=Math.hypot(mx,mz)>.1&&!p.dead;
  p.yaw=cam.yaw;
  if(moving&&p.prayT>0){p.prayT=0;toast('A oração foi interrompida.');}
  if(moving){
   const L=Math.min(1,Math.hypot(mx,mz));const ang=Math.atan2(mx,mz)+cam.yaw;
   const g0=groundAt(p.pos.x,p.pos.z);const reg0=TS.reg;const inWater=reg0&&reg0.fluid&&(reg0.fluid.type==='water'||reg0.fluid.type==='sea')&&g0<reg0.fluid.lvl-.3&&p.pos.y<reg0.fluid.lvl;
-  let sp=9*(keys.has('shift')?2.3:1)*(has('calcados')?1.2:1)*(p.slowT>0?.55:1)*(inWater?.6:1)*L;
+  let sp=9*(keys.has('shift')||GP.sprint?2.3:1)*(has('calcados')?1.2:1)*(p.slowT>0?.55:1)*(inWater?.6:1)*L;
   const o={x:p.pos.x,z:p.pos.z,y:p.pos.y};moveEntity(o,Math.sin(ang)*sp*dt,Math.cos(ang)*sp*dt,'player');p.pos.x=o.x;p.pos.z=o.z;
  }
  if(!valid(p.pos.x,p.pos.z,'player',true)){ // segurança contra estados inválidos
@@ -2640,9 +2656,59 @@ function update(dt){
  cdSet('abAtk',p.atkCd,.42);cdSet('abSword',p.swordCd,5);cdSet('abShield',p.shieldCd,14);cdSet('abPray',p.prayCd,18);
  const it=nearestInteract();const pr=$('#prompt');if(it&&!p.dead){pr.hidden=false;pr.textContent=(isTouch?'Usar':'E')+' — '+it.label;}else pr.hidden=true;
 }
+
+/* =========================================================
+   CONTROLE (gamepad): Xbox, PlayStation, Android e genéricos
+   ========================================================= */
+const GP={idx:null,prev:[],mx:0,mz:0,sprint:false,active:false,navT:0,nav:-1};
+const PADB={A:0,B:1,X:2,Y:3,LB:4,RB:5,LT:6,RT:7,SEL:8,START:9,L3:10,R3:11,UP:12,DOWN:13,LEFT:14,RIGHT:15};
+addEventListener('gamepadconnected',e=>{GP.idx=e.gamepad.index;padLabels(true);toast('Controle conectado. Veja os botões em “Como jogar”.');});
+addEventListener('gamepaddisconnected',e=>{if(GP.idx===e.gamepad.index){GP.idx=null;GP.mx=GP.mz=0;GP.sprint=false;padLabels(false);toast('Controle desconectado.');}});
+function padLabels(on){GP.active=on;const L=on?{abAtk:'X / RT',abSword:'Y',abShield:'LB',abPray:'RB'}:{abAtk:'Clique',abSword:'F',abShield:'Q',abPray:'R'};for(const id in L){const el=document.querySelector('#'+id+' .k');if(el)el.textContent=L[id];}}
+function padRumble(ms,str){try{const g=navigator.getGamepads()[GP.idx];const a=g&&g.vibrationActuator;if(a&&a.playEffect)a.playEffect('dual-rumble',{duration:ms,strongMagnitude:str,weakMagnitude:str*.6});}catch(e){}}
+const dz=(v,d=.18)=>Math.abs(v)<d?0:(v-Math.sign(v)*d)/(1-d);
+function fakeKey(k){dispatchEvent(new KeyboardEvent('keydown',{key:k,bubbles:true}));setTimeout(()=>dispatchEvent(new KeyboardEvent('keyup',{key:k,bubbles:true})),30);}
+// navegação nos menus: o painel aberto que estiver por cima
+function padPanel(){const ov=[...document.querySelectorAll('.overlay')].filter(o=>!o.hidden&&getComputedStyle(o).display!=='none'&&o.id!=='rotate');return ov.length?ov[ov.length-1]:null;}
+function padItems(panel){return[...panel.querySelectorAll('button,input,select,[role=button],.vfrag')].filter(el=>!el.disabled&&el.offsetParent!==null&&!el.hidden);}
+function padFocus(panel,dir){const it=padItems(panel);if(!it.length)return;let i=it.indexOf(document.activeElement);if(i<0)i=dir>0?-1:0;i=(i+dir+it.length)%it.length;it[i].focus();it[i].scrollIntoView({block:'nearest'});document.body.classList.add('padnav');}
+function padAdjust(el,dir){if(el.tagName==='INPUT'&&el.type==='range'){const st=+el.step||1;el.value=clamp(+el.value+dir*st,+el.min,+el.max);el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}));return true;}
+ if(el.tagName==='SELECT'){el.selectedIndex=clamp(el.selectedIndex+dir,0,el.options.length-1);el.dispatchEvent(new Event('change',{bubbles:true}));return true;}
+ if(el.tagName==='INPUT'&&el.type==='checkbox'){el.click();return true;}return false;}
+function pollPad(dt){
+ if(!navigator.getGamepads)return;const pads=navigator.getGamepads();let g=GP.idx!=null?pads[GP.idx]:null;
+ if(!g){for(const q of pads)if(q&&q.connected){g=q;GP.idx=q.index;padLabels(true);break;}}
+ if(!g){GP.mx=GP.mz=0;GP.sprint=false;return;}
+ const B=g.buttons.map(b=>b&&(b.pressed||b.value>.5));const PV=GP.prev;const down=i=>B[i]&&!PV[i];GP.prev=B;
+ const lx=dz(g.axes[0]||0),ly=dz(g.axes[1]||0),rx=dz(g.axes[2]||0),ry=dz(g.axes[3]||0);
+ // cutscene final
+ if(CINE.active){if(down(PADB.A)||down(PADB.B)||down(PADB.START))fakeKey('Escape');return;}
+ const panel=padPanel();
+ if(panel&&(!started||overlayOpen||subFrom||panel.id==='title')){
+  GP.mx=GP.mz=0;GP.sprint=false;
+  GP.navT-=dt;const vy=(B[PADB.DOWN]?1:0)-(B[PADB.UP]?1:0)||(Math.abs(ly)>.5?Math.sign(ly):0);const vx=(B[PADB.RIGHT]?1:0)-(B[PADB.LEFT]?1:0)||(Math.abs(lx)>.5?Math.sign(lx):0);
+  if((vy||vx)&&GP.navT<=0){GP.navT=GP.nav===(vy*3+vx)?.16:.32;GP.nav=vy*3+vx;const el=document.activeElement;if(vx&&el&&panel.contains(el)&&padAdjust(el,vx)){}else padFocus(panel,vy||vx);}
+  if(!vy&&!vx){GP.navT=0;GP.nav=-9;}
+  if(down(PADB.A)){const el=document.activeElement;if(el&&panel.contains(el)&&el.tagName!=='SELECT'&&!(el.tagName==='INPUT'&&el.type==='range'))el.click();else padFocus(panel,1);}
+  if(down(PADB.B)||down(PADB.START)){if(overlayOpen||subFrom)fakeKey('Escape');}
+  if(overlayOpen==='mapOv'&&down(PADB.SEL))closeOverlay();
+  if(overlayOpen==='codex'&&down(PADB.UP)&&false)closeOverlay();
+  // rolar textos longos com o analógico direito
+  if(Math.abs(ry)>0){const sc=panel.querySelector('.sheet')||panel;sc.scrollTop+=ry*900*dt;}
+  return;}
+ if(!started||paused)return;
+ // em jogo
+ GP.mx=lx;GP.mz=ly;GP.sprint=B[PADB.LT]||B[PADB.L3];
+ const sens=OPT.sens||1;cam.yaw-=rx*2.8*sens*dt;cam.pitch=clamp(cam.pitch+ry*2.1*sens*dt*(OPT.inv?-1:1),-1.35,1.3);
+ if(down(PADB.A))pressed.jump=true;if(down(PADB.B))pressed.interact=true;if(down(PADB.X)||down(PADB.RT))pressed.attack=true;
+ if(down(PADB.Y))pressed.sword=true;if(down(PADB.LB))pressed.shield=true;if(down(PADB.RB))pressed.pray=true;
+ if(B[PADB.A]||B[PADB.X]||B[PADB.RT])document.body.classList.remove('padnav');
+ if(down(PADB.SEL))openMap();if(down(PADB.UP)||down(PADB.R3))openCodex();if(down(PADB.START))openPause();
+}
 function loop(){
  requestAnimationFrame(loop);
  const dt=Math.min(.05,clock.getDelta());
+ pollPad(dt);
  if(!paused){if(!(isTouch&&innerHeight>innerWidth))update(dt);}else if(CINE.active)cineUpdate(dt);else if(!started){vm.visible=false;time+=dt;cam.yaw+=dt*.08;const t=new THREE.Vector3(0,6,320);camera.position.set(Math.sin(cam.yaw)*48,22,320+Math.cos(cam.yaw)*48);camera.lookAt(t);const tod0=DAY.tod;DAY.tod=.36;envUpdate(dt,{id:'blue',fog:0x0e3a4a,fogD:.011,sky:0x2a6a8a},0,320);DAY.tod=tod0;anims.forEach(f=>f(time,dt));}
  vmCam.quaternion.copy(camera.quaternion);vmCam.aspect=camera.aspect;vmCam.updateProjectionMatrix();vmHemi.intensity=hemi.intensity*.7;vmHemi.color.copy(hemi.color);vmSun.intensity=sun.intensity*.7;vmSun.color.copy(sun.color);vmSun.position.copy(sun.position).sub(sun.target.position).normalize();vmSun.target.position.set(0,0,0);vmLamp.intensity=lantern.intensity*.8;
  if(composer)composer.render();else{renderer.autoClear=false;renderer.clear();renderer.render(scene,camera);if(vm.visible){renderer.clearDepth();renderer.render(vmScene,vmCam);}}
